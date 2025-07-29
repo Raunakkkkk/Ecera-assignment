@@ -160,41 +160,6 @@ npm run dev
 | ------ | --------------------------- | -------------------- |
 | POST   | `/api/upload/profile-photo` | Upload profile photo |
 
-## 🗄️ Database Schema
-
-### User Model
-
-```javascript
-{
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  phone: { type: String },
-  age: { type: Number, required: true },
-  gender: { type: String, enum: ['male', 'female', 'other'], required: true },
-  interestedIn: { type: String, enum: ['male', 'female', 'both'], required: true },
-  location: { type: String, required: true },
-  occupation: { type: String },
-  profilePhoto: { type: String },
-  about: { type: String },
-  isProfileComplete: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-}
-```
-
-### Interest Model
-
-```javascript
-{
-  fromUser: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  toUser: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  status: { type: String, enum: ['pending', 'accepted', 'rejected'], default: 'pending' },
-  message: { type: String },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-}
-```
 
 ## 🎨 Features in Detail
 
@@ -250,52 +215,5 @@ SaatPhere/
 │   └── server.js         # Server entry point
 └── public/              # Static assets
 ```
-
-### Available Scripts
-
-```bash
-# Frontend
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run preview      # Preview production build
-
-# Backend
-npm start            # Start production server
-npm run dev          # Start development server with nodemon
-```
-
-## 🤝 Contributing
-
-We welcome contributions! Please follow these steps:
-
-1. **Fork the repository**
-2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
-3. **Commit your changes**: `git commit -m 'Add amazing feature'`
-4. **Push to the branch**: `git push origin feature/amazing-feature`
-5. **Open a Pull Request**
-
-### Development Guidelines
-
-- Follow the existing code style
-- Add tests for new features
-- Update documentation as needed
-- Ensure all tests pass before submitting
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **React Team** for the amazing frontend framework
-- **Express.js Team** for the robust backend framework
-- **MongoDB Team** for the flexible database solution
-- **Tailwind CSS** for the beautiful styling framework
-
-## 📞 Support
-
-For support, email support@saatphere.com or create an issue in this repository.
-
----
 
 **Made with ❤️ for finding perfect matches**
