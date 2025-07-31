@@ -9,39 +9,50 @@ import MutualMatches from "./MutualMatches";
 const Dashboard = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("potential");
+  const [matchesRefreshTrigger, setMatchesRefreshTrigger] = useState(0);
+
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    // Refresh matches when switching to matches tab
+    if (tabId === "matches") {
+      setMatchesRefreshTrigger((prev) => prev + 1);
+    }
+  };
 
   const tabs = [
-    { 
-      id: "potential", 
-      name: "Potential Matches", 
+    {
+      id: "potential",
+      name: "Potential Matches",
       component: PotentialMatches,
       icon: "👥",
-      description: "Discover new people who match your preferences"
+      description: "Discover new people who match your preferences",
     },
     {
       id: "received",
       name: "Received Interests",
       component: ReceivedInterests,
       icon: "💌",
-      description: "See who has shown interest in you"
+      description: "See who has shown interest in you",
     },
-    { 
-      id: "sent", 
-      name: "Sent Interests", 
+    {
+      id: "sent",
+      name: "Sent Interests",
       component: SentInterests,
       icon: "📤",
-      description: "Track your sent interests and their status"
+      description: "Track your sent interests and their status",
     },
-    { 
-      id: "matches", 
-      name: "Mutual Matches", 
+    {
+      id: "matches",
+      name: "Mutual Matches",
       component: MutualMatches,
       icon: "💕",
-      description: "Your successful matches and connections"
+      description: "Your successful matches and connections",
+      props: { refreshTrigger: matchesRefreshTrigger },
     },
   ];
 
-  const ActiveComponent = tabs.find((tab) => tab.id === activeTab)?.component;
+  const activeTabData = tabs.find((tab) => tab.id === activeTab);
+  const ActiveComponent = activeTabData?.component;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
@@ -76,8 +87,18 @@ const Dashboard = () => {
               to="/profile"
               className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl hover:from-purple-700 hover:to-pink-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl text-sm sm:text-base"
             >
-              <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              <svg
+                className="w-4 h-4 sm:w-5 sm:h-5 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                />
               </svg>
               Edit Profile
             </Link>
@@ -91,7 +112,7 @@ const Dashboard = () => {
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => handleTabChange(tab.id)}
                   className={`flex-1 flex flex-col items-center py-4 px-3 rounded-xl font-medium text-sm transition-all duration-200 ${
                     activeTab === tab.id
                       ? "bg-white text-purple-600 shadow-md border border-purple-200"
@@ -110,7 +131,9 @@ const Dashboard = () => {
 
           {/* Tab Content */}
           <div className="p-8">
-            {ActiveComponent && <ActiveComponent />}
+            {ActiveComponent && (
+              <ActiveComponent {...(activeTabData?.props || {})} />
+            )}
           </div>
         </div>
 
@@ -120,8 +143,18 @@ const Dashboard = () => {
             <div className="flex items-start space-x-4">
               <div className="flex-shrink-0">
                 <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
-                  <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  <svg
+                    className="w-6 h-6 text-yellow-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                    />
                   </svg>
                 </div>
               </div>
@@ -131,7 +164,8 @@ const Dashboard = () => {
                 </h3>
                 <div className="mt-2 text-yellow-700">
                   <p>
-                    Add more details to your profile to increase your chances of finding a match.
+                    Add more details to your profile to increase your chances of
+                    finding a match.
                   </p>
                 </div>
                 <div className="mt-4">

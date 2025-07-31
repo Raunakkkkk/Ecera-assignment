@@ -60,11 +60,17 @@ router.post(
   }
 );
 
-// Get interests received by current user
+// Get interests received by current user (only pending ones)
 router.get("/received", async (req, res) => {
   try {
-    const interests = await Interest.find({ toUser: req.user._id })
-      .populate("fromUser", "name age gender location occupation profilePhoto")
+    const interests = await Interest.find({
+      toUser: req.user._id,
+      status: "pending",
+    })
+      .populate(
+        "fromUser",
+        "name email phone age gender location occupation profilePhoto about"
+      )
       .sort({ createdAt: -1 });
 
     res.json(interests);
@@ -78,7 +84,10 @@ router.get("/received", async (req, res) => {
 router.get("/sent", async (req, res) => {
   try {
     const interests = await Interest.find({ fromUser: req.user._id })
-      .populate("toUser", "name age gender location occupation profilePhoto")
+      .populate(
+        "toUser",
+        "name email phone age gender location occupation profilePhoto about"
+      )
       .sort({ createdAt: -1 });
 
     res.json(interests);
@@ -164,46 +173,65 @@ router.delete("/:interestId/cancel", async (req, res) => {
   }
 });
 
-// Get mutual matches (where both users have accepted each other)
+// Get mutual matches (where either user sent interest and it was accepted)
 router.get("/matches", async (req, res) => {
   try {
     const userId = req.user._id;
 
-    // Find interests where current user is the sender and status is accepted
+    // Find interests where current user sent and got accepted
     const sentAccepted = await Interest.find({
       fromUser: userId,
       status: "accepted",
     }).populate(
       "toUser",
-      "name age gender location occupation profilePhoto about"
+      "name email phone age gender location occupation profilePhoto about"
     );
 
-    // Find interests where current user is the recipient and status is accepted
+    // Find interests where current user received and accepted
     const receivedAccepted = await Interest.find({
       toUser: userId,
       status: "accepted",
     }).populate(
       "fromUser",
-      "name age gender location occupation profilePhoto about"
+      "name email phone age gender location occupation profilePhoto about"
     );
 
-    // Find mutual matches
+    // Combine all matches - both sent and received accepted interests
     const matches = [];
 
-    for (const sent of sentAccepted) {
-      const mutual = receivedAccepted.find(
-        (received) =>
-          received.fromUser._id.toString() === sent.toUser._id.toString()
-      );
-      if (mutual) {
-        matches.push({
-          user: sent.toUser,
-          matchedAt: sent.updatedAt,
-        });
-      }
-    }
+    // Add matches where I sent interest and they accepted
+    sentAccepted.forEach((interest) => {
+      matches.push({
+        user: interest.toUser,
+        matchedAt: interest.updatedAt,
+      });
+    });
 
-    res.json(matches);
+    // Add matches where they sent interest and I accepted
+    receivedAccepted.forEach((interest) => {
+      matches.push({
+        user: interest.fromUser,
+        matchedAt: interest.updatedAt,
+      });
+    });
+
+    // Remove duplicates (in case both users sent interests to each other)
+    const uniqueMatches = matches.reduce((acc, current) => {
+      const existing = acc.find(
+        (match) => match.user._id.toString() === current.user._id.toString()
+      );
+      if (!existing) {
+        acc.push(current);
+      } else {
+        // Keep the earlier match date
+        if (new Date(current.matchedAt) < new Date(existing.matchedAt)) {
+          existing.matchedAt = current.matchedAt;
+        }
+      }
+      return acc;
+    }, []);
+
+    res.json(uniqueMatches);
   } catch (error) {
     console.error("Get matches error:", error);
     res.status(500).json({ message: "Server error" });

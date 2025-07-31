@@ -58,6 +58,15 @@ const ReceivedInterests = () => {
 
       // Remove the interest from the list after responding
       setInterests(interests.filter((interest) => interest._id !== interestId));
+
+      // Show success message
+      if (status === "accepted") {
+        alert(
+          "✅ Interest accepted! Check your Mutual Matches tab to see your new match."
+        );
+      } else {
+        alert("Interest declined.");
+      }
     } catch (error) {
       alert(error.message);
     }
